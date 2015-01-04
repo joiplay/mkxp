@@ -29,6 +29,7 @@
 
 #include <SDL_scancode.h>
 #include <SDL_joystick.h>
+#include <SDL_gamecontroller.h>
 #include <SDL_mouse.h>
 #include <SDL_mutex.h>
 
@@ -246,6 +247,8 @@ struct RGSSThreadData
 	const int refreshRate;
 
 	Config config;
+
+	SDL_GameController *gamecontroller;
 
 	std::string rgssErrorMsg;
 

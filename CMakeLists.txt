@@ -241,6 +241,7 @@ set(EMBEDDED_INPUT
 	shader/blurH.vert
 	shader/blurV.vert
 	shader/simpleMatrix.vert
+	assets/gamecontrollerdb.txt
 	assets/liberation.ttf
 	assets/icon.png
 )
