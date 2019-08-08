@@ -136,11 +136,22 @@ kernelLoadDataInt(const char *filename, bool rubyExc)
 	rb_gc_start();
 
 	VALUE port = fileIntForPath(filename, rubyExc);
-
+    
+    // RGSS checks to see if a file is in the RGSSAD,
+    // and if it is, just passes a char* and the length
+    // of the file to rb_str_new and gives that back to
+    // Marshal. I haven't checked if the whole archive
+    // is kept decrypted in memory (probably, if the
+    // file is always locked), but either way, dumping
+    // the file to a string is much faster than faking
+    // the IO. Seems to cause a bit of startup lag,
+    // but that's no doubt fixable
+    
 	VALUE marsh = rb_const_get(rb_cObject, rb_intern("Marshal"));
 
 	// FIXME need to catch exceptions here with begin rescue
-	VALUE result = rb_funcall2(marsh, rb_intern("load"), 1, &port);
+    VALUE data = fileIntRead(0, 0, port);
+	VALUE result = rb_funcall2(marsh, rb_intern("load"), 1, &data);
 
 	rb_funcall2(port, rb_intern("close"), 0, NULL);
 
