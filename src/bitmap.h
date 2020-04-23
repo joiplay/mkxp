@@ -46,6 +46,8 @@ public:
 
 	int width()  const;
 	int height() const;
+	bool isMega() const;
+
 	IntRect rect() const;
 
 	void blt(int x, int y,
@@ -120,6 +122,8 @@ public:
     const std::string& getClipText() const;
 
 	sigc::signal<void> modified;
+
+	static int maxSize();
 
 private:
 	void releaseResources();
