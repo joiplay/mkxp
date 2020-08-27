@@ -187,17 +187,9 @@ raiseRbExc(const Exception &exc);
 #define DECL_TYPE(Klass) \
 	extern rb_data_type_t Klass##Type
 
-/* 2.1 has added a new field (flags) to rb_data_type_t */
-#if RUBY_API_VERSION_MAJOR > 1 && RUBY_API_VERSION_MINOR > 0
-/* TODO: can mkxp use RUBY_TYPED_FREE_IMMEDIATELY here? */
-#define DEF_TYPE_FLAGS 0
-#else
-#define DEF_TYPE_FLAGS
-#endif
-
 #define DEF_TYPE_CUSTOMNAME_AND_FREE(Klass, Name, Free) \
 	rb_data_type_t Klass##Type = { \
-		Name, { 0, Free, 0, { 0, 0 } }, 0, 0, DEF_TYPE_FLAGS \
+		Name,NULL,Free, 0 \
 	}
 
 #define DEF_TYPE_CUSTOMFREE(Klass, Free) \
