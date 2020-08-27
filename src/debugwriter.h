@@ -26,10 +26,6 @@
 #include <sstream>
 #include <vector>
 
-#ifdef __ANDROID__
-#include <android/log.h>
-#endif
-
 
 /* A cheap replacement for qDebug() */
 
@@ -59,14 +55,7 @@ public:
 		return *this;
 	}
 
-	~Debug()
-	{
-#ifdef __ANDROID__
-		__android_log_write(ANDROID_LOG_DEBUG, "mkxp", buf.str().c_str());
-#else
-		std::cerr << buf.str() << std::endl;
-#endif
-	}
+	~Debug();
 
 private:
 	std::stringstream buf;
