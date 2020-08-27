@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
 
 	/* Add controller bindings from embedded controller DB */
 	SDL_RWops *controllerDB;
-	controllerDB = SDL_RWFromConstMem(assets_gamecontrollerdb_txt, assets_gamecontrollerdb_txt_len);
+	controllerDB = SDL_RWFromConstMem(mkxp_assets_gamecontrollerdb_txt, mkxp_assets_gamecontrollerdb_txt_len);
 	SDL_GameControllerAddMappingsFromRW(controllerDB, 1);
 
 	rtData.gamecontroller = NULL;

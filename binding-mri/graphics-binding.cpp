@@ -198,10 +198,10 @@ RB_METHOD(graphicsPlayMovie)
 	rb_get_args(argc, argv, "z", &filename RB_ARG_END);
 
 #ifdef __ANDROID__
-	playMovieJNI(filename);
+	playMovieJNI((char*)filename);
 #else
     shState->graphics().playMovie(filename);
-#end
+#endif
 	return Qnil;
 }
 
