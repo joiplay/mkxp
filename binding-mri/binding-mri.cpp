@@ -332,9 +332,35 @@ RB_METHOD(_kernelCaller)
 
 	return trace;
 }
+void replaceStringInPlace(std::string& subject, const std::string& search,
+                          const std::string& replace) {
+    size_t pos = 0;
+    while ((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+    }
+}
+
 
 static VALUE newStringUTF8(const char *string, long length)
 {
+    //Replace SHIFT_JIS and ASCII-8BIT with UTF-8 in string
+	try{
+		std::string str(string);
+		
+		replaceStringInPlace(str, "Shift_JIS", "UTF-8");
+		replaceStringInPlace(str, "SHIFT_JIS", "UTF-8");
+		replaceStringInPlace(str, "ASCII-8BIT", "UTF-8");
+
+		char * p = new char [str.length()+1];
+		strcpy (p, str.c_str());
+		string = p;
+	
+		return rb_enc_str_new(string, str.size(), rb_utf8_encoding());
+	} catch (const Exception &e){
+		Debug()<<e.msg;
+	}
+    
 	return rb_enc_str_new(string, length, rb_utf8_encoding());
 }
 
