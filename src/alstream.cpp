@@ -277,7 +277,7 @@ void ALStream::stopStream()
 
 	if (thread)
 	{
-		SDL_WaitThread(thread, 0);
+		SDL_DetachThread(thread);
 		thread = 0;
 		needsRewind.set();
 	}
