@@ -33,13 +33,13 @@
 
 #include <SDL_ttf.h>
 
-#define BUNDLED_FONT liberation
+#define BUNDLED_FONT ubuntuwqy
 
 #define BUNDLED_FONT_DECL(FONT) \
 	extern unsigned char mkxp_assets_##FONT##_ttf[]; \
 	extern unsigned int mkxp_assets_##FONT##_ttf_len;
 
-BUNDLED_FONT_DECL(liberation)
+BUNDLED_FONT_DECL(ubuntuwqy)
 
 #define BUNDLED_FONT_D(f) mkxp_assets_## f ##_ttf
 #define BUNDLED_FONT_L(f) mkxp_assets_## f ##_ttf_len
