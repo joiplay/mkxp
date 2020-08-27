@@ -67,6 +67,7 @@ NORETURN(void rb_error_arity(int, int, int));
 #define RUBY_T_STRING T_STRING
 #define RUBY_T_FLOAT T_FLOAT
 #define RUBY_T_FIXNUM T_FIXNUM
+#define RUBY_T_BIGNUM T_BIGNUM
 #define RUBY_T_TRUE T_TRUE
 #define RUBY_T_FALSE T_FALSE
 #define RUBY_T_NIL T_NIL
@@ -341,7 +342,8 @@ rb_float_arg(VALUE arg, double *out, int argPos = 0)
 		break;
 
 	default:
-		rb_raise(rb_eTypeError, "Argument %d: Expected float", argPos);
+		//Don't raise exception and hope it works
+        *out = arg;
 	}
 }
 
@@ -358,9 +360,14 @@ rb_int_arg(VALUE arg, int *out, int argPos = 0)
 	case RUBY_T_FIXNUM :
 		*out = FIX2INT(arg);
 		break;
+        
+    case RUBY_T_BIGNUM :
+		*out = FIX2INT(arg);
+		break;
 
 	default:
-		rb_raise(rb_eTypeError, "Argument %d: Expected fixnum", argPos);
+		//Don't raise exception and hope it works
+        *out = arg;
 	}
 }
 
