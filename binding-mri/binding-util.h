@@ -341,6 +341,10 @@ rb_float_arg(VALUE arg, double *out, int argPos = 0)
 		*out = FIX2INT(arg);
 		break;
 
+	case RUBY_T_NIL :
+		*out = 0;
+		break;
+        
 	default:
 		//Don't raise exception and hope it works
         *out = arg;
@@ -365,6 +369,10 @@ rb_int_arg(VALUE arg, int *out, int argPos = 0)
 		*out = FIX2INT(arg);
 		break;
 
+    case RUBY_T_NIL :
+        *out = 0;
+        break;
+                
 	default:
 		//Don't raise exception and hope it works
         *out = arg;
