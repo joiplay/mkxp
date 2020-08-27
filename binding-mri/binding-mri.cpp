@@ -42,6 +42,12 @@
 
 #include <SDL_filesystem.h>
 
+#ifdef __ANDROID__
+extern "C" {
+	void showMessageDialogJNI(char* message);
+}
+#endif
+
 extern const char module_rpg1[];
 extern const char module_rpg2[];
 extern const char module_rpg3[];
@@ -182,7 +188,7 @@ static void printP(int argc, VALUE *argv,
 			rb_str_buf_cat2(dispString, sep);
 	}
 
-	showMsg(RSTRING_PTR(dispString));
+	showMessageDialogJNI(StringValueCStr(dispString));
 }
 
 RB_METHOD(mriPrint)
