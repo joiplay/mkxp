@@ -101,6 +101,8 @@ struct BitmapPrivate
 	 * in the texture and blit to it directly, saving
 	 * ourselves the expensive blending calculation */
 	pixman_region16_t tainted;
+    
+    std::string clipText;
 
 	BitmapPrivate(Bitmap *self)
 	    : self(self),
@@ -754,6 +756,8 @@ void Bitmap::clear()
 	guardDisposed();
 
 	GUARD_MEGA;
+    
+    p->clipText.clear();
 
 	p->bindFBO();
 
@@ -992,6 +996,8 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 
 	std::string fixed = fixupString(str);
 	str = fixed.c_str();
+    
+    p->clipText += fixed;
 
 	if (*str == '\0')
 		return;
@@ -1320,6 +1326,11 @@ void Bitmap::bindTex(ShaderBase &shader)
 void Bitmap::taintArea(const IntRect &rect)
 {
 	p->addTaintedArea(rect);
+}
+
+const std::string& Bitmap::getClipText() const
+{
+	return p->clipText;
 }
 
 void Bitmap::releaseResources()

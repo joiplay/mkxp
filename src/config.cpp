@@ -177,6 +177,7 @@ void Config::read(int argc, char *argv[])
 	PO_DESC(enableBlitting, bool, true) \
 	PO_DESC(maxTextureSize, int, 0) \
 	PO_DESC(gameFolder, std::string, ".") \
+    PO_DESC(copyText, bool, false) \
 	PO_DESC(anyAltToggleFS, bool, false) \
 	PO_DESC(enableReset, bool, true) \
 	PO_DESC(allowSymlinks, bool, false) \

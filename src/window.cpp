@@ -23,7 +23,9 @@
 
 #include "viewport.h"
 #include "sharedstate.h"
+#include "config.h"
 #include "bitmap.h"
+#include "input.h"
 #include "etc.h"
 #include "etc-internal.h"
 #include "tilequad.h"
@@ -35,6 +37,7 @@
 #include "glstate.h"
 
 #include <sigc++/connection.h>
+#include <SDL_clipboard.h>
 
 template<typename T>
 struct Sides
@@ -247,6 +250,7 @@ struct WindowPrivate
 	EtcTemps tmp;
 
 	sigc::connection prepareCon;
+    bool copyToClipboard;
 
 	WindowPrivate(Viewport *viewport = 0)
 	    : windowskin(0),
@@ -272,6 +276,8 @@ struct WindowPrivate
 		controlsQuadArray.resize(14);
 		cursorVert.count = 9;
 		pauseAniVert.count = 1;
+        
+        copyToClipboard = shState->config().copyText;
 
 		prepareCon = shState->prepareDraw.connect
 		        (sigc::mem_fun(this, &WindowPrivate::prepare));
@@ -748,6 +754,13 @@ void Window::setActive(bool value)
 	if (p->active == value)
 		return;
 
+    if (value & p->copyToClipboard)
+	{
+		const std::string& clipText = p->contents->getClipText();
+		if (!clipText.empty())
+			SDL_SetClipboardText(clipText.c_str());
+	}
+    
 	p->active = value;
 	p->cursorAniAlphaIdx = 0;
 }
@@ -758,6 +771,13 @@ void Window::setPause(bool value)
 
 	if (p->pause == value)
 		return;
+
+    if (value & p->copyToClipboard)
+	{
+		const std::string& clipText = p->contents->getClipText();
+		if (!clipText.empty())
+			SDL_SetClipboardText(clipText.c_str());
+	}
 
 	p->pause = value;
 	p->pauseAniAlphaIdx = 0;
@@ -869,6 +889,13 @@ void Window::setZ(int value)
 void Window::setVisible(bool value)
 {
 	ViewportElement::setVisible(value);
+    
+    if (value & p->copyToClipboard)
+	{
+		const std::string& clipText = p->contents->getClipText();
+		if (!clipText.empty())
+			SDL_SetClipboardText(clipText.c_str());
+	}
 
 	p->controlsElement.setVisible(value);
 }

@@ -116,6 +116,8 @@ public:
 
 	/* Adds 'rect' to tainted area */
 	void taintArea(const IntRect &rect);
+    
+    const std::string& getClipText() const;
 
 	sigc::signal<void> modified;
 

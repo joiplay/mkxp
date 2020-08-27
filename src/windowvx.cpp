@@ -22,11 +22,13 @@
 #include "windowvx.h"
 
 #include "bitmap.h"
+#include "input.h"
 #include "etc.h"
 #include "etc-internal.h"
 #include "quad.h"
 #include "quadarray.h"
 #include "sharedstate.h"
+#include "config.h"
 #include "texpool.h"
 #include "tilequad.h"
 #include "glstate.h"
@@ -35,6 +37,7 @@
 #include <limits>
 #include <algorithm>
 #include <sigc++/connection.h>
+#include <SDL_clipboard.h>
 
 #define DEF_Z         (rgssVer >= 3 ? 100 :   0)
 #define DEF_PADDING   (rgssVer >= 3 ?  12 :  16)
@@ -220,6 +223,7 @@ struct WindowVXPrivate
 	uint8_t cursorAlphaIdx;
 
 	Vec2i sceneOffset;
+    bool copyToClipboard;
 
 	WindowVXPrivate(int x, int y, int w, int h)
 	    : windowskin(0),
@@ -263,6 +267,8 @@ struct WindowVXPrivate
 			ctrlVertDirty = true;
 		}
 
+        copyToClipboard = shState->config().copyText;
+        
 		prepareCon = shState->prepareDraw.connect
 			(sigc::mem_fun(this, &WindowVXPrivate::prepare));
 
@@ -933,6 +939,13 @@ void WindowVX::setActive(bool value)
 
 	if (p->active == value)
 		return;
+    
+    if (value & p->copyToClipboard)
+	{
+		const std::string& clipText = p->contents->getClipText();
+		if (!clipText.empty())
+			SDL_SetClipboardText(clipText.c_str());
+	}
 
 	p->active = value;
 	p->cursorAlphaIdx = cursorAlphaResetIdx;
@@ -956,6 +969,13 @@ void WindowVX::setPause(bool value)
 
 	if (p->pause == value)
 		return;
+    
+    if (value & p->copyToClipboard)
+	{
+		const std::string& clipText = p->contents->getClipText();
+		if (!clipText.empty())
+			SDL_SetClipboardText(clipText.c_str());
+	}
 
 	p->pause = value;
 	p->pauseAlphaIdx = 0;
@@ -1079,6 +1099,13 @@ void WindowVX::setOpenness(int value)
 
 	if (p->openness == value)
 		return;
+
+    if (p->openness == 0 & p->copyToClipboard)
+	{
+		const std::string& clipText = p->contents->getClipText();
+		if (!clipText.empty())
+			SDL_SetClipboardText(clipText.c_str());
+	}
 
 	p->openness = value;
 	p->updateBaseQuad();
