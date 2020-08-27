@@ -28,6 +28,7 @@
 #ifdef __ANDROID__
 extern "C" {
 	void sendMessageJNI(int, int);
+    void playMovieJNI(char* address);
 }
 #endif
 
@@ -196,8 +197,11 @@ RB_METHOD(graphicsPlayMovie)
 	const char *filename;
 	rb_get_args(argc, argv, "z", &filename RB_ARG_END);
 
-	shState->graphics().playMovie(filename);
-
+#ifdef __ANDROID__
+	playMovieJNI(filename);
+#else
+    shState->graphics().playMovie(filename);
+#end
 	return Qnil;
 }
 
