@@ -295,6 +295,63 @@ static void strTolower(std::string &str)
 		str[i] = tolower(str[i]);
 }
 
+static std::string normalizePath(std::string path)
+{
+    std::stack<std::string> st;
+    std::string dir;
+    std::string res;
+    
+    int path_len = path.length();
+    
+    for (int i = 0; i<path_len; i++)
+    {
+        dir.clear();
+        while (path[i] == '/')
+            i++;
+        
+        while (i < path_len && path[i] != '/')
+        {
+            dir.push_back(path[i]);
+            i++;
+        }
+        
+        if(dir.compare("..") == 0)
+        {
+            if(!st.empty())
+                st.pop();
+        }
+        else if (dir.compare(".") == 0)
+        {
+            continue;
+        }
+        else if (dir.length() != 0)
+        {
+            st.push(dir);
+        }
+        
+    }
+    
+    std::stack<std::string> st1;
+    while (!st.empty())
+    {
+        st1.push(st.top());
+        st.pop();
+    }
+    
+    while (!st1.empty())
+    {
+        std::string temp = st1.top();
+        if(st1.size() != 1)
+            res.append(temp + "/");
+        else
+            res.append(temp);
+        
+        st1.pop();
+    }
+    
+    return res;
+}
+
 const Uint32 SDL_RWOPS_PHYSFS = SDL_RWOPS_UNKNOWN+10;
 
 struct FileSystemPrivate
@@ -633,8 +690,11 @@ openReadEnumCB(void *d, const char *dirpath, const char *filename)
 
 void FileSystem::openRead(OpenHandler &handler, const char *filename)
 {
+    std::string fileString = filename;
+    fileString = normalizePath(fileString);
+    const char *nfilename = fileString.c_str();
 	char buffer[512];
-	size_t len = strcpySafe(buffer, filename, sizeof(buffer), -1);
+	size_t len = strcpySafe(buffer, nfilename, sizeof(buffer), -1);
 	char *delim;
 
 	if (p->havePathCache)
@@ -681,15 +741,29 @@ void FileSystem::openRead(OpenHandler &handler, const char *filename)
 		throw Exception(Exception::PHYSFSError, "PhysFS: %s", data.physfsError);
 
 	if (data.matchCount == 0)
-		throw Exception(Exception::NoFileError, "%s", filename);
+		throw Exception(Exception::NoFileError, "%s", nfilename);
 }
 
 void FileSystem::openReadRaw(SDL_RWops &ops,
                              const char *filename,
                              bool freeOnClose)
 {
-	PHYSFS_File *handle = PHYSFS_openRead(filename);
-	assert(handle);
+	std::string fileString = filename;
+    fileString = normalizePath(fileString);
+	PHYSFS_File *handle = PHYSFS_openRead(fileString.c_str());
+	if (!handle)
+	{
+		PHYSFS_ErrorCode error = PHYSFS_getLastErrorCode();
+		switch (error)
+		{
+		case PHYSFS_ERR_NOT_FOUND:
+		case PHYSFS_ERR_NOT_A_FILE:
+			throw Exception(Exception::NoFileError, "%s", fileString.c_str());
+		default:
+			throw Exception(Exception::PHYSFSError,
+			                "PhysFS: %s", PHYSFS_getErrorByCode(error));
+		}
+	}
 
 	initReadOps(handle, ops, freeOnClose);
 }
