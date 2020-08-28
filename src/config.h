@@ -129,6 +129,7 @@ struct Config
 
 	std::string customScript;
 	std::set<std::string> preloadScripts;
+    std::set<std::string> postloadScripts;
 	std::vector<std::string> rtps;
 
 	std::vector<std::string> fontSubs;

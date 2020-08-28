@@ -416,6 +416,19 @@ struct BacktraceData
 	BoostHash<std::string, std::string> scriptNames;
 };
 
+
+static bool stringContains(std::string str, std::string substr)
+{
+    if( str.find(substr) != std::string::npos)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 #define SCRIPT_SECTION_FMT (rgssVer >= 3 ? "{%04ld}" : "Section%03ld")
 
 static void runRMXPScripts(BacktraceData &btData)
@@ -540,6 +553,23 @@ static void runRMXPScripts(BacktraceData &btData)
 			fname = newStringUTF8(buf, len);
 			btData.scriptNames.insert(buf, scriptName);
 
+            //Get script name as string
+            std::string scriptString = RSTRING_PTR(string);
+            
+            std::string mainRGSS3 = "rgss_main";
+            std::string mainRGSS1n2 = "$scene.main";
+            std::string mainPokemon = "mainFunction";
+            
+            if(stringContains(scriptString, mainRGSS3) || (stringContains(scriptString, mainRGSS1n2)) || (stringContains(scriptString, mainPokemon)))
+            {
+                Debug()<<"Executing postload scripts";
+                for (std::set<std::string>::iterator i = conf.postloadScripts.begin();
+                i != conf.postloadScripts.end(); ++i)
+                runCustomScript(*i);
+            }
+            
+            Debug()<<"Executing script "<<scriptName;
+
 			int state;
 			evalString(string, fname, &state);
 			if (state)
@@ -623,6 +653,7 @@ static void mriBindingExecute()
 
 #if RUBY_API_VERSION_MAJOR == 1
 	ruby_init();
+    rb_eval_string("$KCODE='U'");
 #else
 	ruby_sysinit(&argc, &argv);
 	ruby_setup();
