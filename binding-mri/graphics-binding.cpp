@@ -190,6 +190,13 @@ RB_METHOD(graphicsReset)
 	return Qnil;
 }
 
+RB_METHOD(graphicsCenter)
+{
+    RB_UNUSED_PARAM;
+    
+    return Qnil;
+}
+
 RB_METHOD(graphicsPlayMovie)
 {
 	RB_UNUSED_PARAM;
@@ -261,8 +268,11 @@ void graphicsBindingInit()
 	_rb_define_module_function(module, "transition", graphicsTransition);
 	_rb_define_module_function(module, "frame_reset", graphicsFrameReset);
     _rb_define_module_function(module, "screenshot", graphicsScreenshot);
-
 	_rb_define_module_function(module, "__reset__", graphicsReset);
+    
+    
+    
+    
 
 #ifdef __ANDROID__
 	_rb_define_module_function(module, "send_message", graphicsSendMessage);
@@ -271,7 +281,7 @@ void graphicsBindingInit()
 	INIT_GRA_PROP_BIND( FrameRate,  "frame_rate"  );
 	INIT_GRA_PROP_BIND( FrameCount, "frame_count" );
 
-	if (rgssVer >= 2)
+	if (rgssVer >= 1)
 	{
 	_rb_define_module_function(module, "width", graphicsWidth);
 	_rb_define_module_function(module, "height", graphicsHeight);
@@ -280,8 +290,21 @@ void graphicsBindingInit()
 	_rb_define_module_function(module, "fadein", graphicsFadein);
 	_rb_define_module_function(module, "snap_to_bitmap", graphicsSnapToBitmap);
 	_rb_define_module_function(module, "resize_screen", graphicsResizeScreen);
+    _rb_define_module_function(module, "center", graphicsCenter);
+    
+    INIT_GRA_PROP_BIND( Brightness, "brightness" );
 
-	INIT_GRA_PROP_BIND( Brightness, "brightness" );
+    //Bindings for Pokemon Essential
+    _rb_define_module_function(module, "poke_wait", graphicsWait);
+	_rb_define_module_function(module, "poke_fadeout", graphicsFadeout);
+	_rb_define_module_function(module, "poke_fadein", graphicsFadein);
+    _rb_define_module_function(module, "poke_width", graphicsWidth);
+	_rb_define_module_function(module, "poke_height", graphicsHeight);
+    _rb_define_module_function(module, "poke_snap_to_bitmap", graphicsSnapToBitmap);
+    _rb_define_module_function(module, "poke_resize_screen", graphicsResizeScreen);
+    _rb_define_module_function(module, "poke_center", graphicsCenter);
+	
+    INIT_GRA_PROP_BIND( Brightness, "poke_brightness" );
 	}
 
 	if (rgssVer >= 3)
