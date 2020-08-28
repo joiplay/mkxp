@@ -380,7 +380,7 @@ static VALUE newStringUTF8(const char *string, long length)
         replaceStringInPlace(str, ".freeze\n", "\n");
         replaceStringInPlace(str, ".freeze ", " ");
         //Fix invalid multibyte escape on wf-input
-        ReplaceStringInPlace(str, "/\\x80|\\x81/", "/P|Q/");
+        replaceStringInPlace(str, "/\\x80|\\x81/", "/P|Q/");
 
 		char * p = new char [str.length()+1];
 		strcpy (p, str.c_str());
