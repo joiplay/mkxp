@@ -215,6 +215,10 @@ struct BitmapPrivate
 
 	static void ensureFormat(SDL_Surface *&surf, Uint32 format)
 	{
+        if (surf == NULL) {
+            return;
+        }
+        
 		if (surf->format->format == format)
 			return;
 
@@ -1020,6 +1024,10 @@ void Bitmap::drawText(const IntRect &rect, const char *str, int align)
 		txtSurf = TTF_RenderUTF8_Solid(font, str, c);
 	else
 		txtSurf = TTF_RenderUTF8_Blended(font, str, c);
+    
+    if(txtSurf == NULL){
+        return;
+    }
 
 	p->ensureFormat(txtSurf, SDL_PIXELFORMAT_ABGR8888);
 
