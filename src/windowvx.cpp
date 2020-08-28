@@ -377,6 +377,10 @@ struct WindowVXPrivate
 			base.borderQuads += TileQuads::oneDimCount(32, sideLen.x) * 2;
 
 		count += base.borderQuads;
+        
+        if((count * 4) > base.vert.vertices.max_size()){
+            return;
+        }
 
 		base.vert.resize(count);
 
