@@ -342,6 +342,11 @@ int main(int argc, char *argv[])
 	SDL_RWops *controllerDB;
 	controllerDB = SDL_RWFromConstMem(mkxp_assets_gamecontrollerdb_txt, mkxp_assets_gamecontrollerdb_txt_len);
 	SDL_GameControllerAddMappingsFromRW(controllerDB, 1);
+    
+    for (std::set<std::string>::iterator i = conf.SDLControllerMappings.begin();i != conf.SDLControllerMappings.end(); ++i)
+    {
+        SDL_GameControllerAddMappingsFromRW(SDL_RWFromFile(i->c_str(), "rb"), 1);
+    }
 
 	rtData.gamecontroller = NULL;
 	if (SDL_NumJoysticks() > 0 && SDL_IsGameController(0))

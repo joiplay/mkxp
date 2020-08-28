@@ -133,6 +133,8 @@ struct Config
 	std::vector<std::string> rtps;
 
 	std::vector<std::string> fontSubs;
+    
+    std::set<std::string> SDLControllerMappings;
 
 	std::vector<std::string> rubyLoadpaths;
 

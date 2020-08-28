@@ -229,6 +229,7 @@ void Config::read(int argc, char *argv[])
             ("postloadScript", po::value<StringVec>()->composing())
 	        ("RTP", po::value<StringVec>()->composing())
 	        ("fontSub", po::value<StringVec>()->composing())
+            ("SDLControllerMappings", po::value<StringVec>()->composing())
 	        ("rubyLoadpath", po::value<StringVec>()->composing())
 	        ;
 
@@ -278,6 +279,8 @@ void Config::read(int argc, char *argv[])
 	GUARD_ALL( rtps = vm["RTP"].as<StringVec>(); );
 
 	GUARD_ALL( fontSubs = vm["fontSub"].as<StringVec>(); );
+    
+    GUARD_ALL( SDLControllerMappings = setFromVec(vm["SDLControllerMappings"].as<StringVec>()); );
 
 	GUARD_ALL( rubyLoadpaths = vm["rubyLoadpath"].as<StringVec>(); );
 
