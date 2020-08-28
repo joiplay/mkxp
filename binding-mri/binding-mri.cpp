@@ -357,6 +357,12 @@ static VALUE newStringUTF8(const char *string, long length)
 		replaceStringInPlace(str, "Shift_JIS", "UTF-8");
 		replaceStringInPlace(str, "SHIFT_JIS", "UTF-8");
 		replaceStringInPlace(str, "ASCII-8BIT", "UTF-8");
+        replaceStringInPlace(str, "US-ASCII", "UTF-8");
+        replaceStringInPlace(str, "EUC-JP", "UTF-8");
+        replaceStringInPlace(str, "CP932", "UTF-8");
+        //Remove .freeze to fix script issues
+        replaceStringInPlace(str, ".freeze\n", "\n");
+        replaceStringInPlace(str, ".freeze ", " ");
 
 		char * p = new char [str.length()+1];
 		strcpy (p, str.c_str());
