@@ -91,6 +91,7 @@ struct Config
 	bool frameSkip;
 	bool syncToRefreshrate;
 
+    float fontScale;
 	bool solidFonts;
 
 	bool subImageFix;

@@ -69,11 +69,16 @@ struct SharedFontStatePrivate
 	/* Pool of already opened fonts; once opened, they are reused
 	 * and never closed until the termination of the program */
 	BoostHash<FontKey, TTF_Font*> pool;
+    
+    //Needed to get font scale
+    Config conf;
 };
 
 SharedFontState::SharedFontState(const Config &conf)
 {
 	p = new SharedFontStatePrivate;
+    
+    p->conf = conf;
 
 	/* Parse font substitutions */
 	for (size_t i = 0; i < conf.fontSubs.size(); ++i)
@@ -161,10 +166,13 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 		shState->fileSystem().openReadRaw(*ops, path, true);
 	}
 
-	// FIXME 0.9 is guesswork at this point
-//	float gamma = (96.0/45.0)*(5.0/14.0)*(size-5);
-//	font = TTF_OpenFontRW(ops, 1, gamma /** .90*/);
-	font = TTF_OpenFontRW(ops, 1, size* 0.90f);
+	float scale = p->conf.fontScale;
+    
+    if (scale < 0.1f){
+        scale = 0.7f;
+    }
+    
+	font = TTF_OpenFontRW(ops, 1, size* scale);
 
 	if (!font)
 		throw Exception(Exception::SDLError, "%s", SDL_GetError());

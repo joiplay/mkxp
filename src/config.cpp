@@ -172,6 +172,7 @@ void Config::read(int argc, char *argv[])
 	PO_DESC(fixedFramerate, int, 0) \
 	PO_DESC(frameSkip, bool, true) \
 	PO_DESC(syncToRefreshrate, bool, false) \
+    PO_DESC(fontScale, float, 0.7) \
 	PO_DESC(solidFonts, bool, false) \
 	PO_DESC(subImageFix, bool, false) \
 	PO_DESC(enableBlitting, bool, true) \
