@@ -40,6 +40,7 @@
 #include <string>
 #include <zlib.h>
 
+#include <SDL_cpuinfo.h>
 #include <SDL_filesystem.h>
 #include <SDL_power.h>
 
@@ -90,13 +91,19 @@ RB_METHOD(mkxpDataDirectory);
 RB_METHOD(mkxpPuts);
 RB_METHOD(mkxpRawKeyStates);
 RB_METHOD(mkxpMouseInWindow);
-RB_METHOD(mkxpPlatform);
-RB_METHOD(mkxpPowerState);
+
 
 RB_METHOD(mkxpRPGVersion);
 RB_METHOD(mriRgssMain);
 RB_METHOD(mriRgssStop);
 RB_METHOD(_kernelCaller);
+
+RB_METHOD(mkxpSetTitle);
+RB_METHOD(mkxpPlatform);
+RB_METHOD(mkxpUserLanguage);
+RB_METHOD(mkxpGameTitle);
+RB_METHOD(mkxpPowerState);
+RB_METHOD(mkxpSettingsMenu);
 
 static void mriBindingInit()
 {
@@ -160,8 +167,20 @@ static void mriBindingInit()
 	_rb_define_module_function(mod, "raw_key_states", mkxpRawKeyStates);
 	_rb_define_module_function(mod, "mouse_in_window", mkxpMouseInWindow);
     _rb_define_module_function(mod, "platform", mkxpPlatform);
-
     _rb_define_module_function(mod, "power_state", mkxpPowerState);
+    
+    VALUE sys = rb_define_module("System");
+    _rb_define_module_function(sys, "data_directory", mkxpDataDirectory);
+    _rb_define_module_function(sys, "set_window_title", mkxpSetTitle);
+    _rb_define_module_function(sys, "show_settings", mkxpSettingsMenu);
+    _rb_define_module_function(sys, "puts", mkxpPuts);
+    _rb_define_module_function(sys, "raw_key_states", mkxpRawKeyStates);
+    _rb_define_module_function(sys, "mouse_in_window", mkxpMouseInWindow);
+    _rb_define_module_function(sys, "platform", mkxpPlatform);
+    _rb_define_module_function(sys, "user_language", mkxpUserLanguage);
+    _rb_define_module_function(sys, "game_title", mkxpGameTitle);
+    _rb_define_module_function(sys, "power_state", mkxpPowerState);
+
 	/* Load global constants */
 	rb_gv_set("MKXP", Qtrue);
 
@@ -252,6 +271,12 @@ RB_METHOD(mkxpRPGVersion)
         return INT2NUM(0);
 }
 
+RB_METHOD(mkxpSetTitle) {
+  RB_UNUSED_PARAM;
+  
+  return Qnil;
+}
+
 RB_METHOD(mkxpRawKeyStates)
 {
 	RB_UNUSED_PARAM;
@@ -273,7 +298,7 @@ RB_METHOD(mkxpPlatform)
 {
     RB_UNUSED_PARAM;
     
-    return rb_str_new_cstr(SDL_GetPlatform());
+    return rb_str_new_cstr("Windows");
 }
 
 RB_METHOD(mkxpPowerState)
@@ -292,6 +317,24 @@ RB_METHOD(mkxpPowerState)
     rb_hash_aset(hash, ID2SYM(rb_intern("discharging")), rb_bool_new(ps == SDL_POWERSTATE_ON_BATTERY));
     
     return hash;
+}
+
+RB_METHOD(mkxpUserLanguage) {
+  RB_UNUSED_PARAM;
+
+  return rb_str_new_cstr("en");
+}
+
+RB_METHOD(mkxpGameTitle) {
+  RB_UNUSED_PARAM;
+
+  return rb_str_new_cstr(shState->config().game.title.c_str());
+}
+
+RB_METHOD(mkxpSettingsMenu) {
+  RB_UNUSED_PARAM;
+
+  return Qnil;
 }
 
 static VALUE rgssMainCb(VALUE block)
