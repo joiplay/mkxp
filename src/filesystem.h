@@ -23,6 +23,7 @@
 #define FILESYSTEM_H
 
 #include <SDL_rwops.h>
+#include <string>
 
 struct FileSystemPrivate;
 class SharedFontState;
@@ -66,6 +67,9 @@ public:
 
 	/* Does not perform extension supplementing */
 	bool exists(const char *filename);
+    
+    //Normalize file paths
+    std::string normalizePath(std::string path);
 
 private:
 	FileSystemPrivate *p;

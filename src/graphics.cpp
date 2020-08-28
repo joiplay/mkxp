@@ -23,6 +23,7 @@
 
 #include "util.h"
 #include "gl-util.h"
+#include "gl-fun.h"
 #include "sharedstate.h"
 #include "config.h"
 #include "glstate.h"
@@ -31,6 +32,7 @@
 #include "quad.h"
 #include "eventthread.h"
 #include "texpool.h"
+#include "filesystem.h"
 #include "bitmap.h"
 #include "etc-internal.h"
 #include "disposable.h"
@@ -951,6 +953,45 @@ void Graphics::resizeScreen(int width, int height)
 void Graphics::playMovie(const char *filename)
 {
 	Debug() << "Graphics.playMovie(" << filename << ") not implemented";
+}
+
+void Graphics::screenshot(const char *filename) {
+  int w = p->scSize.x;
+  int h = p->scSize.y;
+
+  update();
+
+  SDL_Surface *tmp, *formatted, *img;
+  tmp = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
+  img = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 0, 0, 0, 0);
+  if (!tmp || !img) {
+    if (tmp)
+      SDL_FreeSurface(tmp);
+    if (img)
+      SDL_FreeSurface(img);
+    throw Exception(Exception::SDLError, "%s", SDL_GetError());
+  }
+  
+  glReadPixels(p->scOffset.x, p->scOffset.y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, tmp->pixels);
+  
+  formatted = SDL_ConvertSurfaceFormat(tmp, SDL_PIXELFORMAT_RGBA32, 0);
+  for (int i = 0; i < h; i++) {
+    memcpy((char *)img->pixels + 4 * w * i,
+           (char *)formatted->pixels + 4 * w * (h - i - 1), 4 * w);
+  }
+  if (tmp)
+    SDL_FreeSurface(tmp);
+  if (formatted)
+    SDL_FreeSurface(formatted);
+  
+  std::string fn = shState->config().gameFolder+"/"+shState->fileSystem().normalizePath(filename);
+  SDL_RWops *bmp = SDL_RWFromFile(fn.c_str(), "wb");
+  int rc = SDL_SaveBMP_RW(img, bmp, 1);
+
+  if (rc)
+    throw new Exception(Exception::SDLError, "%s", SDL_GetError());
+  if (img)
+    SDL_FreeSurface(img);
 }
 
 DEF_ATTR_RD_SIMPLE(Graphics, Brightness, int, p->brightness)

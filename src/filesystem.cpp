@@ -295,7 +295,7 @@ static void strTolower(std::string &str)
 		str[i] = tolower(str[i]);
 }
 
-static std::string normalizePath(std::string path)
+std::string FileSystem::normalizePath(std::string path)
 {
     std::stack<std::string> st;
     std::string dir;
