@@ -199,6 +199,23 @@ void ALStream::closeSource()
 	delete source;
 }
 
+typedef struct wavHeader
+{
+    char chunckID[4];
+    uint32_t chunckSize;
+    char format[4];
+    char subchunk1ID[4];
+    uint32_t subchunk1Size;
+    uint16_t audioFormat;
+    uint16_t numChannels;
+    uint32_t sampleRate;
+    uint32_t byteRate;
+    uint16_t blockAlign;
+    uint16_t bitsPerSample;
+    char subchunk2ID[4];
+    uint32_t subchunk2Size;
+}wav_header;
+
 struct ALStreamOpenHandler : FileSystem::OpenHandler
 {
 	SDL_RWops *srcOps;
@@ -217,17 +234,20 @@ struct ALStreamOpenHandler : FileSystem::OpenHandler
 		*srcOps = ops;
 
 		/* Try to read ogg file signature */
-		char sig[5] = { 0 };
-		SDL_RWread(srcOps, sig, 1, 4);
-		SDL_RWseek(srcOps, 0, RW_SEEK_SET);
 
 		try
 		{
+			char sig[5] = { 0 };
+			SDL_RWread(srcOps, sig, 1, 4);
+			SDL_RWseek(srcOps, 0, RW_SEEK_SET);
+			
 			if (!strcmp(sig, "OggS"))
 			{
 				source = createVorbisSource(*srcOps, looped);
+				
 				return true;
 			}
+            
 
 			if (!strcmp(sig, "MThd"))
 			{
@@ -239,8 +259,21 @@ struct ALStreamOpenHandler : FileSystem::OpenHandler
 					return true;
 				}
 			}
-
-			source = createSDLSource(*srcOps, ext, STREAM_BUF_SIZE, looped);
+            
+            if (!strcmp(sig, "RIFF"))
+            {
+                wav_header wavHeader;
+                SDL_RWread(srcOps, &wavHeader, 1, sizeof(wav_header));
+                SDL_RWseek(srcOps, 0, RW_SEEK_SET);
+                
+                if(wavHeader.bitsPerSample > 16)
+                {
+                    return false;
+                }
+            }
+            
+            source = createSDLSource(*srcOps, ext, STREAM_BUF_SIZE, looped);
+			
 		}
 		catch (const Exception &e)
 		{
