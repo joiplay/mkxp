@@ -285,9 +285,9 @@ RB_METHOD(mkxpPowerState)
     
     VALUE hash = rb_hash_new();
     
-    rb_hash_aset(hash, ID2SYM(rb_intern("seconds")), (secs > -1) ? INT2NUM(secs) : RUBY_Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("seconds")), (secs > -1) ? INT2NUM(secs) : Qnil);
     
-    rb_hash_aset(hash, ID2SYM(rb_intern("percent")), (pct > -1) ? INT2NUM(pct) : RUBY_Qnil);
+    rb_hash_aset(hash, ID2SYM(rb_intern("percent")), (pct > -1) ? INT2NUM(pct) : Qnil);
     
     rb_hash_aset(hash, ID2SYM(rb_intern("discharging")), rb_bool_new(ps == SDL_POWERSTATE_ON_BATTERY));
     
