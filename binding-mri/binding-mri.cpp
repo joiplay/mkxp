@@ -90,6 +90,7 @@ RB_METHOD(mkxpPuts);
 RB_METHOD(mkxpRawKeyStates);
 RB_METHOD(mkxpMouseInWindow);
 
+RB_METHOD(mkxpRPGVersion);
 RB_METHOD(mriRgssMain);
 RB_METHOD(mriRgssStop);
 RB_METHOD(_kernelCaller);
@@ -152,6 +153,7 @@ static void mriBindingInit()
 	VALUE mod = rb_define_module("MKXP");
 	_rb_define_module_function(mod, "data_directory", mkxpDataDirectory);
 	_rb_define_module_function(mod, "puts", mkxpPuts);
+    _rb_define_module_function(mod, "rpg_version", mkxpRPGVersion);
 	_rb_define_module_function(mod, "raw_key_states", mkxpRawKeyStates);
 	_rb_define_module_function(mod, "mouse_in_window", mkxpMouseInWindow);
 
@@ -189,6 +191,7 @@ static void printP(int argc, VALUE *argv,
 	}
 
 	showMessageDialogJNI(StringValueCStr(dispString));
+    Debug()<<StringValueCStr(dispString);
 }
 
 RB_METHOD(mriPrint)
@@ -229,6 +232,19 @@ RB_METHOD(mkxpPuts)
 	Debug() << str;
 
 	return Qnil;
+}
+
+RB_METHOD(mkxpRPGVersion)
+{
+    RB_UNUSED_PARAM;
+    if (rgssVer == 1)
+		return INT2NUM(1);
+	else if (rgssVer == 2)
+        return INT2NUM(2);
+    else if (rgssVer == 3)
+        return INT2NUM(3);
+    else
+        return INT2NUM(0);
 }
 
 RB_METHOD(mkxpRawKeyStates)
@@ -363,6 +379,8 @@ static VALUE newStringUTF8(const char *string, long length)
         //Remove .freeze to fix script issues
         replaceStringInPlace(str, ".freeze\n", "\n");
         replaceStringInPlace(str, ".freeze ", " ");
+        //Fix invalid multibyte escape on wf-input
+        ReplaceStringInPlace(str, "/\\x80|\\x81/", "/P|Q/");
 
 		char * p = new char [str.length()+1];
 		strcpy (p, str.c_str());
