@@ -145,6 +145,24 @@ RB_METHOD(inputMouseY)
 	return rb_fix_new(shState->input().mouseY());
 }
 
+RB_METHOD(inputAsyncKeyState)
+{
+	RB_UNUSED_PARAM;
+
+	int num;
+    rb_get_args(argc, argv, "i", &num RB_ARG_END);
+    
+	int state = shState->input().asyncKeyState(num);
+    
+    if (state == 0x8000)
+    {
+        return rb_fix_new(1);
+    }
+    else 
+    {
+        return rb_fix_new(0);
+    }
+}
 
 struct
 {
@@ -201,6 +219,19 @@ inputBindingInit()
 
 	_rb_define_module_function(module, "mouse_x", inputMouseX);
 	_rb_define_module_function(module, "mouse_y", inputMouseY);
+    
+    _rb_define_module_function(module, "asyncKeyState", inputAsyncKeyState);
+    
+    /*These bindings will be use to override Pokemon Essentials' PSystem_Controls*/
+    _rb_define_module_function(module, "jupdate", inputUpdate);
+	_rb_define_module_function(module, "jpress?", inputPress);
+	_rb_define_module_function(module, "jtrigger?", inputTrigger);
+	_rb_define_module_function(module, "jrepeat?", inputRepeat);
+    _rb_define_module_function(module, "jpressex?", inputPressEx);
+    _rb_define_module_function(module, "jtriggerex?", inputTriggerEx);
+    _rb_define_module_function(module, "jrepeatex?", inputRepeatEx);
+	_rb_define_module_function(module, "jdir4", inputDir4);
+	_rb_define_module_function(module, "jdir8", inputDir8);
 
 	if (rgssVer >= 3)
 	{

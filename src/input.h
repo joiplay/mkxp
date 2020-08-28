@@ -65,6 +65,8 @@ public:
 	/* Non-standard extensions */
 	int mouseX();
 	int mouseY();
+    
+    int asyncKeyState(int vKey);
 
 private:
 	Input(const RGSSThreadData &rtData);

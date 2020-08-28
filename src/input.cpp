@@ -1010,6 +1010,49 @@ int Input::mouseY()
 	return (EventThread::mouseState.y - rtData.screenOffset.y) * rtData.sizeResoRatio.y;
 }
 
+#define ks(sc) shState->eThread().keyStates[SDL_SCANCODE_##sc]
+int Input::asyncKeyState(int key)
+{
+    int result;
+    switch(key){
+        case 0x10: // Any Shift
+            result = (ks(LSHIFT) || ks(RSHIFT)) ? 0x8000 : 0;
+            break;
+
+        case 0x11: // Any Ctrl
+            result = (ks(LCTRL) || ks(RCTRL)) ? 0x8000 : 0;
+            break;
+
+        case 0x12: // Any Alt
+            result = (ks(LALT) || ks(RALT)) ? 0x8000 : 0;
+            break;
+
+        case 0x1: // Mouse button 1
+            result = (SDL_GetMouseState(0, 0) & SDL_BUTTON(1)) ? 0x8000 : 0;
+            break;
+
+        case 0x2: // Mouse button 2
+            result = (SDL_GetMouseState(0, 0) & SDL_BUTTON(3)) ? 0x8000 : 0;
+            break;
+
+        case 0x4: // Middle mouse
+            result = (SDL_GetMouseState(0, 0) & SDL_BUTTON(2)) ? 0x8000 : 0;
+            break;
+
+        default:
+            try {
+                // Use EventThread instead of Input because
+                // Input.update typically gets overridden
+                result = shState->eThread().keyStates[vKeyToScancode[key]] << 15;
+            } catch (...) {
+                result = 0;
+            }
+        break;
+    }
+    return result;
+}
+#undef ks
+
 Input::~Input()
 {
 	delete p;
