@@ -115,26 +115,36 @@ RB_METHOD(audioReset)
 	return Qnil;
 }
 
+RB_METHOD(fmodexInit)
+{
+	return argv[0];
+}
+
 
 #define BIND_PLAY_STOP(entity) \
 	_rb_define_module_function(module, #entity "_play", audio_##entity##Play); \
-	_rb_define_module_function(module, #entity "_stop", audio_##entity##Stop);
+	_rb_define_module_function(module, #entity "_stop", audio_##entity##Stop); \
+    _rb_define_module_function(fmodex, #entity "_play", audio_##entity##Play); \
+	_rb_define_module_function(fmodex, #entity "_stop", audio_##entity##Stop);
 
 #define BIND_FADE(entity) \
-	_rb_define_module_function(module, #entity "_fade", audio_##entity##Fade);
+	_rb_define_module_function(module, #entity "_fade", audio_##entity##Fade); \
+    _rb_define_module_function(fmodex, #entity "_fade", audio_##entity##Fade);
 
 #define BIND_PLAY_STOP_FADE(entity) \
 	BIND_PLAY_STOP(entity) \
 	BIND_FADE(entity)
 
 #define BIND_POS(entity) \
-	_rb_define_module_function(module, #entity "_pos", audio_##entity##Pos);
+	_rb_define_module_function(module, #entity "_pos", audio_##entity##Pos); \
+    _rb_define_module_function(fmodex, #entity "_pos", audio_##entity##Pos);
 
 
 void
 audioBindingInit()
 {
 	VALUE module = rb_define_module("Audio");
+    VALUE fmodex = rb_define_module("FmodEx");
 
 	BIND_PLAY_STOP_FADE( bgm );
 	BIND_PLAY_STOP_FADE( bgs );
@@ -151,4 +161,5 @@ audioBindingInit()
 	BIND_PLAY_STOP( se )
 
 	_rb_define_module_function(module, "__reset__", audioReset);
+    _rb_define_module_function(fmodex, "init", fmodexInit);
 }
