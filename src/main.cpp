@@ -233,14 +233,29 @@ int main(int argc, char *argv[])
 	conf.read(argc, argv);
 
 	if (!conf.gameFolder.empty())
-		if (chdir(conf.gameFolder.c_str()) != 0)
-		{
-			showInitError(std::string("Unable to switch into gameFolder ") + conf.gameFolder);
-			return 0;
-		}
+    {
+        
+        if (chdir(conf.gameFolder.c_str()) != 0)
+        {
+            switch(errno)
+            {
+                case EACCES:
+                    showInitError(std::string("Access is denied for ") + conf.gameFolder);
+                    return 0;
+                case ENAMETOOLONG:
+                    showInitError(std::string("Path is too long ") + conf.gameFolder);
+                    return 0;
+                case ENOENT:
+                    showInitError(std::string("Path does not contain a file or directory ") + conf.gameFolder);
+                    return 0;
+                default:
+                    showInitError(std::string("Unable to switch into gameFolder ") + conf.gameFolder);
+                    return 0;
+            }
+        }
+    }
 
 	conf.readGameINI();
-	conf.readOverlayDesc();
 
 	if (conf.windowTitle.empty())
 		conf.windowTitle = conf.game.title;

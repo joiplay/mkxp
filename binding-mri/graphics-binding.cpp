@@ -232,21 +232,6 @@ RB_METHOD(graphicsSendMessage)
 
 	return Qnil;
 }
-
-RB_METHOD(graphicsSetOverlay)
-{
-	RB_UNUSED_PARAM;
-
-	int id = 0;
-
-	rb_get_args(argc, argv, "i", &id RB_ARG_END);
-
-	shState->graphics().setOverlay(id);
-
-	sendMessageJNI(705, id);
-
-	return Qnil;
-}
 #endif
 
 void graphicsBindingInit()
@@ -262,7 +247,6 @@ void graphicsBindingInit()
 
 #ifdef __ANDROID__
 	_rb_define_module_function(module, "send_message", graphicsSendMessage);
-	_rb_define_module_function(module, "set_overlay", graphicsSetOverlay);
 #endif
 
 	INIT_GRA_PROP_BIND( FrameRate,  "frame_rate"  );

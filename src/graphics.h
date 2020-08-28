@@ -40,7 +40,6 @@ public:
 	                const char *filename = "",
 	                int vague = 40);
 	void frameReset();
-	void setOverlay(int);
 
 	DECL_ATTR( FrameRate,  int )
 	DECL_ATTR( FrameCount, int )

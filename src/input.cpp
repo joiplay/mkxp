@@ -235,106 +235,6 @@ static Input::ButtonCode bcFromString(const std::string &str)
 	return Input::None;
 }
 
-static TouchOverlay::Button dummyOlButton;
-
-static int areaSign(int x0, int y0, int x1, int y1, int x2, int y2)
-{
-    return (x0 - x2) * (y1 - y2) - (x1 - x2) * (y0 - y2);
-}
-
-/* Touch overlay binding */
-struct OlBinding : public Binding
-{
-	OlBinding()
-	    : olb(dummyOlButton)
-	{}
-
-	OlBinding(const TouchOverlay::Button &b)
-	    : Binding(bcFromString(b.target)),
-	      olb(b)
-	{}
-
-	bool sourceActive() const
-	{
-		const Vec2i &scOffset = shState->rtData().screenOffset;
-		const Vec2 &resoRatio = shState->rtData().sizeResoRatio;
-
-		for (size_t i = 0; i < MAX_FINGERS; ++i)
-		{
-			EventThread::FingerState &f = EventThread::touchState.fingers[i];
-
-			if (!f.down)
-				continue;
-
-			int x = (f.x - scOffset.x) * resoRatio.x;
-			int y = (f.y - scOffset.y) * resoRatio.y;
-
-			switch (olb.shape)
-			{
-			case TouchOverlay::Button::Rectangle :
-			{
-				if ((x >= olb.x && x <= olb.x + olb.u.r.width)
-				&&   y >= olb.y && y <= olb.y + olb.u.r.height)
-				{
-#ifdef __ANDROID__
-					EventThread::touchState.ignoreMouse = true;
-#endif
-					return true;
-				}
-
-				break;
-			}
-			case TouchOverlay::Button::Circle :
-			{
-				int dx = x - olb.x;
-				int dy = y - olb.y;
-				int d = sqrt(dx*dx + dy*dy);
-
-				if (d <= olb.u.c.radius)
-				{
-#ifdef __ANDROID__
-					EventThread::touchState.ignoreMouse = true;
-#endif
-					return true;
-				}
-
-				break;
-			}
-			case TouchOverlay::Button::Triangle :
-			{
-				bool s0, s1, s2;
-
-				s0 = areaSign(x, y, olb.x, olb.y, olb.u.t.x1, olb.u.t.y1) < 0;
-				s1 = areaSign(x, y, olb.u.t.x1, olb.u.t.y1, olb.u.t.x2, olb.u.t.y2) < 0;
-				s2 = areaSign(x, y, olb.u.t.x2, olb.u.t.y2, olb.x, olb.y) < 0;
-
-				if ((s0 == s1) && (s1 == s2))
-				{
-#ifdef __ANDROID__
-					EventThread::touchState.ignoreMouse = true;
-#endif
-					return true;
-				}
-
-				break;
-			}
-			}
-		}
-
-		return false;
-	}
-
-	bool sourceRepeatable() const
-	{
-		return true;
-	}
-
-	TouchOverlay::Button olb;
-};
-
-
-
-
 /* Not rebindable */
 static const KbBindingData staticKbBindings[] =
 {
@@ -405,7 +305,6 @@ struct InputPrivate
 	std::vector<JsHatBinding> jsHBindings;
 	std::vector<JsButtonBinding> jsBBindings;
 	std::vector<MsBinding> msBindings;
-	std::vector<OlBinding> olBindings;
 
 	/* Collective binding array */
 	std::vector<Binding*> bindings;
@@ -434,7 +333,6 @@ struct InputPrivate
 	{
 		initStaticKbBindings();
 		initMsBindings();
-		initOlBindings(rtData.config.touchOverlay);
 
 		/* Main thread should have these posted by now */
 		checkBindingChange(rtData);
@@ -573,7 +471,6 @@ struct InputPrivate
 		bindings.clear();
 
 		appendBindings(kbStatBindings);
-		appendBindings(olBindings);
 		appendBindings(msBindings);
 
 		appendBindings(kbBindings);
@@ -598,12 +495,6 @@ struct InputPrivate
 		msBindings[i++] = MsBinding(SDL_BUTTON_LEFT,   Input::MouseLeft);
 		msBindings[i++] = MsBinding(SDL_BUTTON_MIDDLE, Input::MouseMiddle);
 		msBindings[i++] = MsBinding(SDL_BUTTON_RIGHT,  Input::MouseRight);
-	}
-
-	void initOlBindings(const TouchOverlay &ol)
-	{
-		for (size_t i = 0; i < ol.buttons.size(); ++i)
-			olBindings.push_back(OlBinding(ol.buttons[i]));
 	}
 
 	void pollBindings(Input::ButtonCode &repeatCand)
@@ -808,7 +699,6 @@ int Input::mouseX()
 	RGSSThreadData &rtData = shState->rtData();
 	
 #ifdef __ANDROID__ 
-	for (auto i : p->olBindings) if (i.sourceActive()) return -1;
 	if (EventThread::touchState.ignoreMouse == false)
 		for (size_t i = 0; i < MAX_FINGERS; ++i)
 			{
@@ -826,7 +716,6 @@ int Input::mouseY()
 	RGSSThreadData &rtData = shState->rtData();
 
 #ifdef __ANDROID__ 
-	for (auto i : p->olBindings) if (i.sourceActive()) return -1;
 	if (EventThread::touchState.ignoreMouse == false)
 		for (size_t i = 0; i < MAX_FINGERS; ++i)
 			{

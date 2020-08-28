@@ -185,7 +185,6 @@ void Config::read(int argc, char *argv[])
 	PO_DESC(dataPathOrg, std::string, "") \
 	PO_DESC(dataPathApp, std::string, "") \
 	PO_DESC(iconPath, std::string, "") \
-	PO_DESC(overlayPath, std::string, "") \
 	PO_DESC(execName, std::string, "Game") \
 	PO_DESC(titleLanguage, std::string, "") \
 	PO_DESC(midi.soundFont, std::string, "") \
@@ -448,86 +447,4 @@ void Config::readGameINI()
 	}
 
 	setupScreenSize(*this);
-}
-
-using namespace boost::property_tree;
-using namespace boost::property_tree::json_parser;
-static void
-parseOverlayButtonDesc(const ptree &pt, TouchOverlay::Button &out)
-{
-	out.id = pt.get<std::string>("id");
-	out.target = pt.get<std::string>("target");
-	out.x = pt.get<int>("x");
-	out.y = pt.get<int>("y");
-
-	const std::string &shape = pt.get<std::string>("shape");
-
-	if (shape == "rectangle")
-	{
-		out.shape = TouchOverlay::Button::Rectangle;
-		out.u.r.width = pt.get<int>("width");
-		out.u.r.height = pt.get<int>("height");
-	}
-	else if (shape == "circle")
-	{
-		out.shape = TouchOverlay::Button::Circle;
-		out.u.c.radius = pt.get<int>("radius");
-	}
-	else if (shape == "triangle")
-	{
-		out.shape = TouchOverlay::Button::Triangle;
-		out.u.t.x1 = pt.get<int>("x1");
-		out.u.t.y1 = pt.get<int>("y1");
-		out.u.t.x2 = pt.get<int>("x2");
-		out.u.t.y2 = pt.get<int>("y2");
-	}
-	else
-	{
-		throw std::logic_error("unknown button shape: " + shape);
-	}
-}
-
-static void
-parseOverlayDesc(const ptree &pt, TouchOverlay &out)
-{
-	for (auto &img : pt.get_child("images")) {
-		out.images[img.second.get<int>("id")] = img.second.get<std::string>("file");
-	}
-
-	const ptree &buttons = pt.get_child("buttons");
-	for (ptree::const_iterator ci = buttons.begin(); ci != buttons.end(); ++ci)
-	{
-		const ptree &c = ci->second;
-		TouchOverlay::Button button;
-
-		parseOverlayButtonDesc(c, button);
-		out.buttons.push_back(button);
-	}
-}
-
-void Config::readOverlayDesc()
-{
-	SDLRWStream descFile(overlayPath.c_str(), "r");
-
-	if (descFile)
-	{
-		try
-		{
-			ptree json;
-			read_json(descFile.stream(), json);
-
-			TouchOverlay ol;
-			parseOverlayDesc(json, ol);
-
-			touchOverlay = ol;
-		}
-		catch (const std::exception &e)
-		{
-			Debug() << "Error parsing overlay descrption: " << e.what();
-		}
-	}
-	else
-	{
-		Debug() << "Didn't parse overlay desc cuz no file";
-	}
 }
