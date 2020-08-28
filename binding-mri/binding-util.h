@@ -399,12 +399,7 @@ rb_bool_arg(VALUE arg, bool *out, int argPos = 0)
 }
 
 inline void
-rb_check_argc(int actual, int expected)
-{
-	if (actual != expected)
-		rb_raise(rb_eArgError, "wrong number of arguments (%d for %d)",
-		         actual, expected);
-}
+rb_check_argc(int actual, int expected){}
 
 #define RB_METHOD(name) \
 	static VALUE name(int argc, VALUE *argv, VALUE self)
