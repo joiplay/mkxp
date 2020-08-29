@@ -35,6 +35,7 @@ class Graphics
 {
 public:
 	void update();
+    void toggleFastForward();
 	void freeze();
 	void transition(int duration = 8,
 	                const char *filename = "",

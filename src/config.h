@@ -45,6 +45,7 @@ struct Config
 	std::string windowTitle;
 
 	int fixedFramerate;
+    int fastForwardSpeed;
 	bool frameSkip;
 	bool syncToRefreshrate;
 

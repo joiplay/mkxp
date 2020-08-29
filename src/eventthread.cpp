@@ -334,6 +334,11 @@ void EventThread::process(RGSSThreadData &rtData)
 			}
 #endif
 
+            //Toggle FastForward when Page Up key pressed
+            if(event.key.keysym.scancode == SDL_SCANCODE_PAGEUP){
+                shState->graphics().toggleFastForward();
+            }
+
 			keyStates[event.key.keysym.scancode] = true;
 			break;
 

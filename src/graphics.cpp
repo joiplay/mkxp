@@ -472,6 +472,9 @@ struct GraphicsPrivate
 	int frameRate;
 	int frameCount;
 	int brightness;
+    
+    int frameSkipIndex;
+    bool fastForward;
 
 	FPSLimiter fpsLimiter;
 
@@ -493,6 +496,8 @@ struct GraphicsPrivate
 	      frameRate(DEF_FRAMERATE),
 	      frameCount(0),
 	      brightness(255),
+          frameSkipIndex(0),
+          fastForward(false),
 	      fpsLimiter(frameRate),
 	      frozen(false)
 	{
@@ -665,7 +670,21 @@ void Graphics::update()
 
 	if (p->frozen)
 		return;
-
+    
+    if (p->threadData->config.fastForwardSpeed > 0 && p->fastForward)
+    {
+        if(p->threadData->config.fastForwardSpeed > p->frameSkipIndex){
+            p->frameSkipIndex++;
+			++p->frameCount;
+			p->threadData->ethread->notifyFrame();
+			return;
+        }
+        else
+        {
+            p->frameSkipIndex =0;
+        }
+    }
+    
 	if (p->fpsLimiter.frameSkipRequired())
 	{
 		if (p->threadData->config.frameSkip)
@@ -686,6 +705,11 @@ void Graphics::update()
 
 	p->checkResize();
 	p->redrawScreen();
+}
+
+void Graphics::toggleFastForward()
+{
+    p->fastForward = !p->fastForward;
 }
 
 void Graphics::freeze()
@@ -827,7 +851,7 @@ DEF_ATTR_SIMPLE(Graphics, FrameCount, int, p->frameCount)
 
 void Graphics::setFrameRate(int value)
 {
-	p->frameRate = clamp(value, 10, 120);
+	p->frameRate = clamp(value, 10, 360);
 
 	if (p->threadData->config.syncToRefreshrate)
 		return;
