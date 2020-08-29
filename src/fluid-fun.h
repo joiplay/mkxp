@@ -2,7 +2,7 @@
 #define FLUIDFUN_H
 
 #ifdef SHARED_FLUID
-# include <fluidsynth.h>
+# include <fluidlite.h>
 #else
 # define FLUIDSYNTH_VERSION_MAJOR 2
 #endif
