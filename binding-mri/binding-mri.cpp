@@ -85,6 +85,8 @@ void graphicsBindingInit();
 
 void fileIntBindingInit();
 
+void win32apiBindingInit();
+
 RB_METHOD(mriPrint);
 RB_METHOD(mriP);
 RB_METHOD(mkxpDataDirectory);
@@ -131,6 +133,8 @@ static void mriBindingInit()
 	graphicsBindingInit();
 
 	fileIntBindingInit();
+    
+    win32apiBindingInit();
 
 	if (rgssVer >= 3)
 	{
