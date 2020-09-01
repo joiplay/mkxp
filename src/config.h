@@ -117,4 +117,6 @@ struct Config
 	void readGameINI();
 };
 
+bool convertIfNotValidUTF8(Config &conf, std::string str);
+
 #endif // CONFIG_H

@@ -316,6 +316,65 @@ static void setupScreenSize(Config &conf)
 		conf.defScreenH = (conf.rgssVersion == 1 ? 480 : 416);
 }
 
+#ifdef INI_ENCODING
+
+bool convertIfNotValidUTF8(Config &conf, std::string str)
+{
+    /* Can add more later */
+    const char *languages[] =
+    {
+        conf.titleLanguage.c_str(),
+        GUESS_REGION_JP, /* Japanese */
+        GUESS_REGION_KR, /* Korean */
+        GUESS_REGION_CN, /* Chinese */
+        0
+    };
+
+    bool convSuccess = true;
+
+	/* Verify that the string is UTF-8, and if not,
+	 * try to determine the encoding and convert to UTF-8 */
+	if (!validUtf8(str.c_str()))
+	{
+		const char *encoding = 0;
+		convSuccess = false;
+
+		for (size_t i = 0; languages[i]; ++i)
+		{
+			encoding = libguess_determine_encoding(str.c_str(),
+			                                       sizeof(str.size()),
+			                                       languages[i]);
+			if (encoding)
+				break;
+		}
+
+		if (encoding)
+		{
+			iconv_t cd = iconv_open("UTF-8", encoding);
+
+			size_t inLen = str.size();
+			size_t outLen = inLen * 4;
+			std::string buf(outLen, '\0');
+			char *inPtr = const_cast<char*>(str.c_str());
+			char *outPtr = const_cast<char*>(buf.c_str());
+
+			errno = 0;
+			size_t result = iconv(cd, &inPtr, &inLen, &outPtr, &outLen);
+
+			iconv_close(cd);
+
+			if (result != (size_t) -1 && errno == 0)
+			{
+				buf.resize(buf.size()-outLen);
+				str = buf;
+				convSuccess = true;
+			}
+		}
+	}
+    return convSuccess;
+}
+#endif
+
 void Config::readGameINI()
 {
 	if (!customScript.empty())
@@ -364,59 +423,7 @@ void Config::readGameINI()
 	}
 
 #ifdef INI_ENCODING
-	/* Can add more later */
-	const char *languages[] =
-	{
-		titleLanguage.c_str(),
-		GUESS_REGION_JP, /* Japanese */
-		GUESS_REGION_KR, /* Korean */
-		GUESS_REGION_CN, /* Chinese */
-		0
-	};
-
-	bool convSuccess = true;
-
-	/* Verify that the game title is UTF-8, and if not,
-	 * try to determine the encoding and convert to UTF-8 */
-	if (!validUtf8(game.title.c_str()))
-	{
-		const char *encoding = 0;
-		convSuccess = false;
-
-		for (size_t i = 0; languages[i]; ++i)
-		{
-			encoding = libguess_determine_encoding(game.title.c_str(),
-			                                       game.title.size(),
-			                                       languages[i]);
-			if (encoding)
-				break;
-		}
-
-		if (encoding)
-		{
-			iconv_t cd = iconv_open("UTF-8", encoding);
-
-			size_t inLen = game.title.size();
-			size_t outLen = inLen * 4;
-			std::string buf(outLen, '\0');
-			char *inPtr = const_cast<char*>(game.title.c_str());
-			char *outPtr = const_cast<char*>(buf.c_str());
-
-			errno = 0;
-			size_t result = iconv(cd, &inPtr, &inLen, &outPtr, &outLen);
-
-			iconv_close(cd);
-
-			if (result != (size_t) -1 && errno == 0)
-			{
-				buf.resize(buf.size()-outLen);
-				game.title = buf;
-				convSuccess = true;
-			}
-		}
-	}
-
-	if (!convSuccess)
+	if (!convertIfNotValidUTF8(*this, game.title))
 		game.title.clear();
 #else
 	if (!validUtf8(game.title.c_str()))

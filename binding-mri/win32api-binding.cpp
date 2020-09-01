@@ -4,6 +4,7 @@
 #include "sharedstate.h"
 #include "graphics.h"
 #include "input.h"
+#include "config.h"
 #include "iniconfig.h"
 #include "debugwriter.h"
 
@@ -236,22 +237,38 @@ VALUE User32Messagebox(int argc, VALUE *argv)
 
 VALUE Kernel32Getprivateprofilestring(int argc, VALUE *argv)
 {
-    //Finish later
-    //VALUE lpAppName, lpKeyName, lpDefault, lpReturnedString, nSize, lpFileName;
-    //rb_scan_args(argc, argv, "15", &lpAppName, &lpKeyName, &lpDefault, &lpReturnedString, &nSize, &lpFileName);
+    VALUE lpAppName, lpKeyName, lpDefault, lpReturnedString, nSize, lpFileName;
+    rb_scan_args(argc, argv, "15", &lpAppName, &lpKeyName, &lpDefault, &lpReturnedString, &nSize, &lpFileName);
     
-    //std::string filename = StringValueCStr(lpFileName);
-    //SDLRWStream iniFile(filename.c_str(), "r");
-    //if (iniFile)
-	//{
-    //    INIConfiguration ic;
-    //    if(ic.load(iniFile.stream()))
-    //    {
-    //        std::string value = ic.getStringProperty(StringValueCStr(lpAppName),StringValueCStr(lpKeyName), StringValueCStr(lpDefault));
-    //        char* returnStr = (char*) value.c_str();
-    //        memcpy(RSTRING_PTR(lpReturnedString), &returnStr, sizeof(returnStr));
-    //    }
-    //}
+    std::string lpdefault = StringValueCStr(lpDefault);
+#ifdef INI_ENCODING
+    std::string filename = StringValueCStr(lpFileName);
+    std::string appname = StringValueCStr(lpAppName);
+    std::string keyname = StringValueCStr(lpKeyName);
+    
+    if(!convertIfNotValidUTF8(shState->config(), filename) &&
+    !convertIfNotValidUTF8(shState->config(), appname) &&
+    !convertIfNotValidUTF8(shState->config(), keyname) &&
+    !convertIfNotValidUTF8(shState->config(), lpdefault)) {
+        memcpy(RSTRING_PTR(lpReturnedString), lpdefault.c_str(), lpdefault.size());
+        return Qfalse;
+    }
+    
+    
+    SDLRWStream iniFile(filename.c_str(), "r");
+    if (iniFile)
+	{
+        INIConfiguration ic;
+        if(ic.load(iniFile.stream()))
+        {
+            std::string value = ic.getStringProperty(appname.c_str(), keyname.c_str(), lpdefault.c_str());
+            memcpy(RSTRING_PTR(lpReturnedString), value.c_str(), value.size());
+            return Qtrue;
+       }
+    }
+#endif
+
+    memcpy(RSTRING_PTR(lpReturnedString), lpdefault.c_str(), lpdefault.size());
     return Qfalse;
 }
 
