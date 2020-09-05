@@ -240,7 +240,16 @@ VALUE Kernel32Getprivateprofilestring(int argc, VALUE *argv)
     VALUE lpAppName, lpKeyName, lpDefault, lpReturnedString, nSize, lpFileName;
     rb_scan_args(argc, argv, "15", &lpAppName, &lpKeyName, &lpDefault, &lpReturnedString, &nSize, &lpFileName);
     
-    std::string lpdefault = StringValueCStr(lpDefault);
+    std::string lpdefault;
+    if(RB_TYPE_P(lpDefault, T_STRING))
+    {
+        lpdefault = StringValueCStr(lpDefault);
+    }
+    else
+    {
+        lpdefault = "";
+    }
+    
 #ifdef INI_ENCODING
     std::string filename = StringValueCStr(lpFileName);
     std::string appname = StringValueCStr(lpAppName);
@@ -462,9 +471,7 @@ VALUE win32apiInitialize (int argc, VALUE* argv, VALUE self)
     strFunction = capitalize(strFunction);
     
     std::string imp = strDll + strFunction;
-    
-    Debug()<<imp.c_str();
-    
+        
     VALUE callImp;
     if(checkImp(imp))
     {
