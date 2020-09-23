@@ -174,6 +174,7 @@ void Config::read(int argc, char *argv[])
 	PO_DESC(frameSkip, bool, false) \
 	PO_DESC(syncToRefreshrate, bool, false) \
     PO_DESC(fontScale, float, 0.7) \
+    PO_DESC(customFont, std::string, "") \
 	PO_DESC(solidFonts, bool, false) \
 	PO_DESC(subImageFix, bool, false) \
 	PO_DESC(enableBlitting, bool, true) \

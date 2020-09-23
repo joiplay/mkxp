@@ -56,6 +56,15 @@ static SDL_RWops *openBundledFont()
 	return SDL_RWFromConstMem(BNDL_F_D(BUNDLED_FONT), BNDL_F_L(BUNDLED_FONT));
 }
 
+static SDL_RWops *openCustomFont()
+{
+	SDL_RWops *ops = SDL_AllocRW();
+    shState->fileSystem().openReadRaw(*ops, shState->config().customFont.c_str(), true);
+
+	return ops;
+}
+
+
 struct SharedFontStatePrivate
 {
 	/* Maps: font family name, To: substituted family name,
@@ -150,7 +159,11 @@ _TTF_Font *SharedFontState::getFont(std::string family,
 	/* Not in pool; open new handle */
 	SDL_RWops *ops;
 
-	if (family.empty())
+    if (!p->conf.customFont.empty())
+    {
+        ops = openCustomFont();
+    }
+	else if (family.empty())
 	{
 		/* Built-in font */
 		ops = openBundledFont();
