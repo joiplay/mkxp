@@ -394,7 +394,9 @@ rb_bool_arg(VALUE arg, bool *out, int argPos = 0)
 		break;
 
 	default:
-		rb_raise(rb_eTypeError, "Argument %d: Expected bool", argPos);
+        //If arg isn't nil, evaluate it as true
+		*out = true;
+		break;
 	}
 }
 
