@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <ruby.h>
 #include <SDL_filesystem.h>
@@ -284,6 +285,36 @@ VALUE Kernel32Getprivateprofilestring(int argc, VALUE *argv)
 
 VALUE Kernel32Writeprivateprofilestring(int argc, VALUE *argv)
 {
+    VALUE lpAppName, lpKeyName, lpString, lpFileName;
+    rb_scan_args(argc, argv, "13", &lpAppName, &lpKeyName, &lpString, &lpFileName);
+    
+#ifdef INI_ENCODING
+    std::string filename = StringValueCStr(lpFileName);
+    std::string appname = StringValueCStr(lpAppName);
+    std::string keyname = StringValueCStr(lpKeyName);
+    std::string str = StringValueCStr(lpString);
+    
+    if(!convertIfNotValidUTF8("", filename) &&
+    !convertIfNotValidUTF8("", appname) &&
+    !convertIfNotValidUTF8("", keyname) &&
+    !convertIfNotValidUTF8("", str)) {
+        return Qfalse;
+    }
+    
+    SDLRWStream iniFile(filename.c_str(), "r+");
+    if (iniFile)
+	{
+        INIConfiguration ic;
+        if(ic.load(iniFile.stream()))
+        {
+            std::ofstream file(filename.c_str());
+            ic.addProperty(appname, keyname, str);
+            ic.save(file);
+            return Qtrue;
+       }
+    }
+#endif
+    
     return Qfalse;
 }
 

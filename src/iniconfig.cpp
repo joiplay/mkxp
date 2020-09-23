@@ -81,6 +81,26 @@ bool INIConfiguration::load (std::istream& is)
 	return true;
 }
 
+//INIConfiguration::save from https://github.com/lacc97/mkxp-win32/blob/master/kernel32/iniconfig.cpp
+//Written by lacc97 and all credits goes to him/her
+bool INIConfiguration::save(std::ostream& outStream) const {
+    if(!outStream.good())
+        return false;
+
+    std::for_each(m_SectionMap.begin(), m_SectionMap.end(), [&](const std::pair<std::string, Section>& selem) {
+        if(!selem.second.m_Name.empty())
+            outStream << "[" << selem.second.m_Name << "]" << std::endl;
+
+        std::for_each(selem.second.m_PropertyMap.begin(), selem.second.m_PropertyMap.end(),
+                      [&](const Section::property_map::value_type& pelem) {
+                          outStream << pelem.second.m_Name << "=" << pelem.second.m_Value << std::endl;
+                      });
+
+        outStream << std::endl;
+    });
+
+    return true;
+}
 
 std::string INIConfiguration::getStringProperty(const std::string& sname, const std::string& name, const std::string& def) const
 {

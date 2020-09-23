@@ -33,12 +33,11 @@ class INIConfiguration
 	typedef std::map<std::string, Section> section_map;
 public:
 	bool load (std::istream& inStream);
+    bool save(std::ostream& outStream) const;
 
 	std::string getStringProperty(const std::string& sname, const std::string& name, const std::string& def = "") const;
-
-protected:
-	void addProperty (const std::string& sname, const std::string& name, const std::string& val);
-
+    void addProperty (const std::string& sname, const std::string& name, const std::string& val);
+    
 private:
 	section_map m_SectionMap;
 };
