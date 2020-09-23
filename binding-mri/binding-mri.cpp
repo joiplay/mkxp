@@ -23,6 +23,7 @@
 #include "binding-util.h"
 #include "sharedstate.h"
 #include "eventthread.h"
+#include "config.h"
 #include "filesystem.h"
 #include "util.h"
 #include "sdl-util.h"
@@ -217,9 +218,13 @@ static void printP(int argc, VALUE *argv,
 		if (i < argc)
 			rb_str_buf_cat2(dispString, sep);
 	}
-
-	showMessageDialogJNI(StringValueCStr(dispString));
-    Debug()<<StringValueCStr(dispString);
+    
+    std::string message = StringValueCStr(dispString);
+#ifdef INI_ENCODING
+    convertIfNotValidUTF8("", message);
+#endif
+	showMessageDialogJNI((char*) message.c_str());
+    Debug()<<message.c_str();
 }
 
 RB_METHOD(mriPrint)
