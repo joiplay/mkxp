@@ -318,12 +318,13 @@ static void setupScreenSize(Config &conf)
 
 #ifdef INI_ENCODING
 
-bool convertIfNotValidUTF8(Config &conf, std::string str)
+
+bool convertIfNotValidUTF8(const char* lang, std::string str)
 {
     /* Can add more later */
     const char *languages[] =
     {
-        conf.titleLanguage.c_str(),
+        lang,
         GUESS_REGION_JP, /* Japanese */
         GUESS_REGION_KR, /* Korean */
         GUESS_REGION_CN, /* Chinese */
@@ -423,7 +424,7 @@ void Config::readGameINI()
 	}
 
 #ifdef INI_ENCODING
-	if (!convertIfNotValidUTF8(*this, game.title))
+	if (!convertIfNotValidUTF8(titleLanguage.c_str(), game.title))
 		game.title.clear();
 #else
 	if (!validUtf8(game.title.c_str()))

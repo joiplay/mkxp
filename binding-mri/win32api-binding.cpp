@@ -247,7 +247,8 @@ VALUE Kernel32Getprivateprofilestring(int argc, VALUE *argv)
     }
     else
     {
-        lpdefault = "";
+        VALUE strValue = rb_funcall2(lpDefault, rb_intern("to_s"), 0, 0);
+        lpdefault = StringValueCStr(strValue);
     }
     
 #ifdef INI_ENCODING
@@ -255,10 +256,10 @@ VALUE Kernel32Getprivateprofilestring(int argc, VALUE *argv)
     std::string appname = StringValueCStr(lpAppName);
     std::string keyname = StringValueCStr(lpKeyName);
     
-    if(!convertIfNotValidUTF8(shState->config(), filename) &&
-    !convertIfNotValidUTF8(shState->config(), appname) &&
-    !convertIfNotValidUTF8(shState->config(), keyname) &&
-    !convertIfNotValidUTF8(shState->config(), lpdefault)) {
+    if(!convertIfNotValidUTF8("", filename) &&
+    !convertIfNotValidUTF8("", appname) &&
+    !convertIfNotValidUTF8("", keyname) &&
+    !convertIfNotValidUTF8("", lpdefault)) {
         memcpy(RSTRING_PTR(lpReturnedString), lpdefault.c_str(), lpdefault.size());
         return Qfalse;
     }
