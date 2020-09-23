@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <vector>
 #include <stack>
+#include <cctype>
 
 #ifdef __APPLE__
 #include <iconv.h>
@@ -418,6 +419,28 @@ void FileSystem::addPath(const char *path)
 		if (io)
 			PHYSFS_mountIo(io, path, 0, 1);
 	}
+}
+
+std::string FileSystem::getPathFromCache(std::string path)
+{
+    std::string tmpPath = normalizePath(path);
+    
+    if(!p->havePathCache)
+        return tmpPath;
+    
+    std::string cachedPath = tmpPath;
+    
+    std::transform(cachedPath.begin(), cachedPath.end(), cachedPath.begin(),
+        [](unsigned char c){ return std::tolower(c); });
+            
+    if(p->pathCache.contains(cachedPath.c_str()))
+    {
+        return p->pathCache[cachedPath];
+    }
+    else
+    {
+        return tmpPath;
+    }
 }
 
 struct CacheEnumData

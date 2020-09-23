@@ -70,6 +70,9 @@ public:
     
     //Normalize file paths
     std::string normalizePath(std::string path);
+    
+    //Get file path from cache
+    std::string getPathFromCache(std::string path);
 
 private:
 	FileSystemPrivate *p;

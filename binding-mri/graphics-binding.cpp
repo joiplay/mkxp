@@ -21,6 +21,7 @@
 
 #include "graphics.h"
 #include "sharedstate.h"
+#include "filesystem.h"
 #include "binding-util.h"
 #include "binding-types.h"
 #include "exception.h"
@@ -221,7 +222,8 @@ RB_METHOD(graphicsPlayMovie)
 	rb_get_args(argc, argv, "z", &filename RB_ARG_END);
 
 #ifdef __ANDROID__
-	playMovieJNI((char*)filename);
+    std::string filePath = shState->fileSystem().getPathFromCache(filename);
+	playMovieJNI((char *)filePath.c_str());
 #else
     shState->graphics().playMovie(filename);
 #endif
